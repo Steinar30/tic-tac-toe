@@ -10,6 +10,7 @@ struct board {
     int w, h;
     int currplayer;
     int** state;
+    int moves;
 };
 
 board_t* init_board();
@@ -20,3 +21,4 @@ void limit_cursor(int* x, int* y);
 void enter_input(board_t* b, int x, int y);
 int test_win(board_t* b);
 int is_moves_left(board_t* b);
+void do_best_move(board_t* b);

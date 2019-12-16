@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+
 char* string_opts[] = {
     " ", "x", "o"
 };
@@ -68,6 +71,7 @@ board_t* init_board()
     b->board_size = 9;
     b->w = 3;
     b->h = 3;
+    b->moves = 0;
     b->state = calloc(sizeof(int), 3);
     for (int i = 0; i < 3; i++) {
         b->state[i] = calloc(sizeof(int), 3);
@@ -76,7 +80,8 @@ board_t* init_board()
     return b;
 }
 
-board_t* copy_board(board_t* b){
+board_t* copy_board(board_t* b)
+{
     board_t* b1 = init_board();
     b1->currplayer = b->currplayer;
     for (int i = 0; i < b->w; i++) {
@@ -133,15 +138,22 @@ void move_cursor(board_t* b, int* x, int* y)
     print_board(b, *x, *y);
 }
 
+void do_move(board_t* b, int x, int y)
+{
+    b->state[y][x] = b->currplayer;
+    if (b->currplayer == p1) {
+        b->currplayer = p2;
+    } else {
+        b->currplayer = p1;
+    }
+    b->moves++;
+}
+
 void enter_input(board_t* b, int x, int y)
 {
     if (b->state[y][x] == 0) {
-        b->state[y][x] = b->currplayer;
-        if (b->currplayer == p1) {
-            b->currplayer = p2;
-        } else {
-            b->currplayer = p1;
-        }
+        do_move(b, x, y);
+        do_best_move(b);
         print_board(b, x, y);
         int r = test_win(b);
         if (r != 0) {
@@ -194,39 +206,41 @@ int test_win(board_t* b)
     return 0;
 }
 
-int is_moves_left(board_t* b)
+void do_best_move(board_t* b)
 {
+    //either place in centre or in corner
+    if (b->moves == 1) {
+        if (b->state[1][1] == p1) {
+            do_move(b, 0, 0);
+        } else {
+            do_move(b, 1, 1);
+        }
+        return;
+    }
+
+    //test if any move lets p1 win, if so do said move
     for (int i = 0; i < b->w; i++) {
         for (int j = 0; j < b->h; j++) {
-            if (b->state[j][i] != 0) {
-                return 1;
-            }
-        }
-    }
-    return 0;
-}
+            if (b->state[j][i] == 0) {
+                b->state[j][i] = p1;
 
-int minimax(board_t* b, int depth, int ismax)
-{
-    int score = test_win(b);
-
-    if (score == p2 || score == p1) {
-        return score;
-    }
-
-    if (is_moves_left(b) == 0) {
-        return 0;
-    }
-
-    if (ismax) {
-        int best = -100;
-        for (int i = 0; i < b->w; i++) {
-            for (int j = 0; j < b->h; j++) {
-                if (b->state[j][i] == 0) {
-                    
+                int win = test_win(b);
+                if (win == p1) {
+                    do_move(b, i, j);
+                    return;
                 }
+                b->state[j][i] = 0;
             }
         }
     }
-    return 0;
+
+    //pick first empty spot if p1 cannot win atm
+    for (int i = 0; i < b->w; i++) {
+        for (int j = 0; j < b->h; j++) {
+            if (b->state[j][i] == 0) {
+                do_move(b, i, j);
+                return;
+            }
+        }
+    }
 }
