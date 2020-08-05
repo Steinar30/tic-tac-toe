@@ -11,13 +11,17 @@ struct board {
     int currplayer;
     int** state;
     int moves;
+    int computer_playing;
+    int p1_session_score;
+    int p2_session_score;
+    int game_in_progress;
 };
 
 board_t* init_board();
 void restart_game(board_t* b);
 void print_board(board_t* b, int x, int y);
 void move_cursor(board_t* b, int* x, int* y);
-void limit_cursor(int* x, int* y);
+void move_cursor_safe(int* x, int* y);
 void enter_input(board_t* b, int x, int y);
 int test_win(board_t* b);
 int is_moves_left(board_t* b);
