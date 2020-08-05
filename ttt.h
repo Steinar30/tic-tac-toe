@@ -14,6 +14,8 @@ struct board {
     int computer_playing;
     int p1_session_score;
     int p2_session_score;
+    int comp_session_score;
+    int p1_comp_session_score;
     int game_in_progress;
 };
 

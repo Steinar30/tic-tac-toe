@@ -85,6 +85,7 @@ board_t* init_board()
     b->computer_playing = 1;
     b->p1_session_score = 0;
     b->p2_session_score = 0;
+    b->comp_session_score = 0;
     b->game_in_progress = 1;
     return b;
 }
@@ -140,13 +141,12 @@ void print_board(board_t* b, int x, int y)
     }
 
     if (b->computer_playing) {
-        printw("\n p1 score %d computer score %d\n", b->p1_session_score, b->p2_session_score);
+        printw("\n player score %d computer score %d\n", b->p1_comp_session_score, b->comp_session_score);
     } else {
         printw("\n p1 score %d p2 score %d\n", b->p1_session_score, b->p2_session_score);
     }
 
     printw("\n press F1 to exit\n press F2 to reset\n press F3 to toggle computer");
-    printw("\n moves: %d", b->moves);
 }
 
 void move_cursor(board_t* b, int* x, int* y)
@@ -173,10 +173,17 @@ int test_end_game(board_t* b, int x, int y)
     int r = test_win(b);
     if (r != 0) {
         if (r == p1) {
-            b->p1_session_score++;
-        }
-        if (r == p2) {
-            b->p2_session_score++;
+            if (b->computer_playing) {
+                b->p1_comp_session_score++;
+            } else {
+                b->p1_session_score++;
+            }
+        } else if (r == p2) {
+            if (b->computer_playing) {
+                b->comp_session_score++;
+            } else {
+                b->p2_session_score++;
+            }
         }
         b->game_in_progress = 0;
         print_board(b, x, y);
